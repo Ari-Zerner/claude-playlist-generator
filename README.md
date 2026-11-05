@@ -187,3 +187,7 @@ Set in `spotify-tool/.env`.
 ## Requirements
 
 Python 3.8+ and the `requests` library (`spotify-tool/requirements.txt`).
+
+## License
+
+MIT. See `LICENSE`.
