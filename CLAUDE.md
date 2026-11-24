@@ -11,6 +11,7 @@ the Spotify login are shared.
 | `playlists/<name>/` | One directory per playlist: `BRIEF.md` (goal, vibe and Spotify description), `Playlist.txt`, `Playlist_before_edits.txt`, `playlist.json` (Spotify link; managed by the tool). |
 | `taste/` | Taste reference, generated from the user's play statistics and, if one is set (`TASTE_PLAYLIST` in `spotify-tool/.env`, optional), a taste playlist and past playlists. Not tracked in git. |
 | `spotify-tool/app.py` | The sync tool. Run it as `python3 spotify-tool/app.py <command>`. |
+| `stats/` | Soundprint, the listening-stats app (`site/index.html`, static, runs in the browser). `collect.py` then `build_profile.py` refresh the user's own stats and print a share link (`stats/data/`, not tracked). Test with `tests/e2e.py site OUT [data/share-link.txt]`. |
 
 ## First run
 

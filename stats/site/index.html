@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Soundprint</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23e8553d'/><g fill='white'><rect x='6' y='13' width='3' height='6' rx='1.5'/><rect x='11' y='8' width='3' height='16' rx='1.5'/><rect x='16' y='11' width='3' height='10' rx='1.5'/><rect x='21' y='6' width='3' height='20' rx='1.5'/></g></svg>">
+<style>
+:root{
+  --bg:#faf8f6; --surface:#ffffff; --surface-2:#f3efeb; --line:#e6e0da;
+  --ink:#16130f; --ink-2:#55504a; --ink-3:#8a837b;
+  --accent:#d9462f; --accent-2:#a8336b; --accent-ink:#fff;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#121110; --surface:#1c1a19; --surface-2:#262321; --line:#34302d;
+  --ink:#f2efea; --ink-2:#c3bdb5; --ink-3:#8f8880;
+  --accent:#f0654a; --accent-2:#d0558f; --accent-ink:#1a0d0a;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:16px 16px 80px}
+header.top{display:flex;align-items:center;gap:10px;padding:6px 0 14px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:-.01em;font-size:18px;color:var(--ink);text-decoration:none}
+.logo i{display:inline-flex;gap:2px;align-items:center;height:22px;width:26px;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:7px}
+.logo i b{display:block;width:3px;background:#fff;border-radius:2px}
+.spacer{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.small{padding:5px 11px;font-size:13px}
+.hero{position:relative;overflow:hidden;border-radius:24px;padding:28px 24px 24px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;margin-bottom:18px}
+.hero::after{content:"";position:absolute;inset:auto -60px -80px auto;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 65%)}
+.hero .kicker{opacity:.85;font-size:13px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.hero h1{margin:4px 0 6px;font-size:clamp(28px,6vw,44px);line-height:1.05;letter-spacing:-.02em}
+.hero .sub{opacity:.9;max-width:52ch}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;position:relative;z-index:1}
+.badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;backdrop-filter:blur(4px)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow)}
+.tile .v{font-size:28px;font-weight:750;letter-spacing:-.02em;line-height:1.1}
+.tile .l{color:var(--ink-2);font-size:13px;margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 2px;font-size:19px;letter-spacing:-.01em}
+.card .note{color:var(--ink-2);font-size:13.5px;margin:0 0 14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.grid2>.card{margin-bottom:0}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:999px;padding:3px;gap:2px;margin-bottom:12px}
+.seg button{border:0;background:transparent;color:var(--ink-2);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+ol.rank li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;padding:5px 6px;border-radius:10px}
+ol.rank li:hover{background:var(--surface-2)}
+ol.rank .n{color:var(--ink-3);font-variant-numeric:tabular-nums;font-weight:700;text-align:right;font-size:13px}
+ol.rank .t{min-width:0}
+ol.rank .t b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ol.rank .t span{display:block;color:var(--ink-2);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ol.rank .bar{height:6px;border-radius:3px;background:var(--accent);margin-top:4px;opacity:.85}
+ol.rank .val{color:var(--ink-2);font-size:12.5px;font-variant-numeric:tabular-nums;text-align:right}
+ol.rank li.top3 .n{color:var(--accent)}
+.more{margin-top:8px}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.pod{border-radius:16px;padding:14px;background:var(--surface-2);min-width:0}
+.pod .disc{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;font-size:17px;margin-bottom:8px}
+.pod b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pod span{font-size:12.5px;color:var(--ink-2)}
+svg{display:block;overflow:visible}
+svg text{fill:var(--ink-3);font-size:11px;font-family:inherit}
+.chart{position:relative;width:100%}
+.axis line,.gridline{stroke:var(--line)}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--ink);color:var(--bg);padding:7px 10px;border-radius:10px;font-size:12.5px;line-height:1.35;max-width:260px;opacity:0;transition:opacity .08s;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#tip b{font-weight:700}
+.heat{display:grid;grid-template-columns:34px repeat(24,1fr);gap:2px;font-size:10.5px;color:var(--ink-3)}
+.heat .c{aspect-ratio:1;border-radius:3px;min-width:0}
+.heat .hl{display:flex;align-items:center}
+.heat .hh{text-align:center}
+.eras{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.era{flex:0 0 170px;scroll-snap-align:start;border-radius:16px;padding:14px;color:#fff;background:linear-gradient(160deg,var(--accent),var(--accent-2));min-height:150px;display:flex;flex-direction:column}
+.era .y{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.era .a{font-weight:700;margin-top:auto;font-size:16px;line-height:1.2}
+.era .s{font-size:12px;opacity:.9;margin-top:4px}
+.meter{position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,color-mix(in oklab,var(--accent) 25%,var(--surface)),var(--accent));margin:30px 0 8px}
+.meter .pin{position:absolute;top:-24px;transform:translateX(-50%);font-weight:700;font-size:13px;white-space:nowrap}
+.meter .pin::after{content:"";position:absolute;left:50%;top:20px;width:3px;height:22px;margin-left:-1.5px;background:var(--ink);border-radius:2px}
+.meterlabels{display:flex;justify-content:space-between;color:var(--ink-3);font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border-radius:999px;padding:4px 10px;font-size:13px;background:var(--surface-2);border:1px solid var(--line)}
+.chip.hot{background:color-mix(in oklab,var(--accent) 18%,var(--surface));border-color:color-mix(in oklab,var(--accent) 40%,var(--surface))}
+details.tbl{margin-top:10px;font-size:13px;color:var(--ink-2)}
+details.tbl summary{cursor:pointer}
+details.tbl table{border-collapse:collapse;margin-top:6px;width:100%;font-variant-numeric:tabular-nums}
+details.tbl td,details.tbl th{padding:3px 8px;border-bottom:1px solid var(--line);text-align:left}
+.drop{border:2px dashed var(--line);border-radius:20px;padding:28px 18px;text-align:center;background:var(--surface);transition:border-color .15s,background .15s}
+.drop.over{border-color:var(--accent);background:color-mix(in oklab,var(--accent) 7%,var(--surface))}
+.drop h3{margin:0 0 6px}
+.steps{margin:0;padding-left:20px;color:var(--ink-2)}
+.steps li{margin:4px 0}
+input[type=text]{font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:min(260px,100%)}
+.banner{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:14px}
+.banner .grow{flex:1;min-width:180px;color:var(--ink-2)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s}
+.toast.on{opacity:1}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;text-align:center}
+.vs .who{font-weight:700;font-size:18px}
+.ring{width:150px;height:150px}
+.muted{color:var(--ink-3)}
+.foot{color:var(--ink-3);font-size:12.5px;text-align:center;margin-top:28px}
+.progress{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;margin-top:14px;display:none}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.err{color:var(--accent);font-weight:600;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="./" id="home"><i><b style="height:6px"></b><b style="height:14px"></b><b style="height:9px"></b><b style="height:16px"></b></i>Soundprint</a>
+    <div class="spacer"></div>
+    <span id="topActions"></span>
+  </header>
+  <main id="app"></main>
+  <div class="foot">Soundprint runs in your browser. Your listening data never leaves your device unless you share a link.</div>
+</div>
+<div id="tip" role="status"></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e4 ? Math.round(n/1e3) + "k" : Math.round(n).toLocaleString();
+const fmtFull = n => Math.round(n).toLocaleString();
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const MINE_KEY = "soundprint.mine";
+
+// ---------- tooltip ----------
+const tip = $("#tip");
+function showTip(html, x, y){ tip.innerHTML = html; tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect(); let lx = x + 14, ly = y - r.height - 12;
+  if (lx + r.width > innerWidth - 8) lx = x - r.width - 14; if (ly < 8) ly = y + 18;
+  tip.style.left = Math.max(8, lx) + "px"; tip.style.top = ly + "px"; }
+function hideTip(){ tip.style.opacity = 0; }
+document.addEventListener("pointermove", e => {
+  const t = e.target.closest?.("[data-tip]");
+  if (t) showTip(t.dataset.tip, e.clientX, e.clientY); else if (!e.target.closest?.("[data-hover]")) hideTip();
+});
+document.addEventListener("pointerdown", e => { const t = e.target.closest?.("[data-tip]"); if (t) showTip(t.dataset.tip, e.clientX, e.clientY); });
+addEventListener("scroll", hideTip, {passive:true});
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2200); }
+
+// ---------- share encoding (deflate-raw + base64url) ----------
+async function pipe(bytes, stream){ return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
+function b64u(bytes){ let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function unb64u(s){ s = s.replace(/-/g,"+").replace(/_/g,"/"); const b = atob(s); const u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+async function encodeProfile(p){ return b64u(await pipe(new TextEncoder().encode(JSON.stringify(p)), new CompressionStream("deflate-raw"))); }
+async function decodeProfile(s){ return JSON.parse(new TextDecoder().decode(await pipe(unb64u(s), new DecompressionStream("deflate-raw")))); }
+function shareable(p){
+  const q = structuredClone(p); const cut = (a, n) => Array.isArray(a) ? a.slice(0, n) : a;
+  q.artists = cut(q.artists, 40); q.tracks = cut(q.tracks, 40); q.genres = cut(q.genres, 20);
+  if (q.terms) for (const k in q.terms) { q.terms[k].a = cut(q.terms[k].a, 30); q.terms[k].t = cut(q.terms[k].t, 30); }
+  return q;
+}
+async function shareLink(p){ return location.origin + location.pathname + "#s=" + await encodeProfile(shareable(p)); }
+
+// ---------- reading a Spotify data export ----------
+async function unzip(file, want){
+  const buf = new Uint8Array(await file.arrayBuffer()); const dv = new DataView(buf.buffer);
+  let eocd = -1; for (let i = buf.length - 22; i >= Math.max(0, buf.length - 70000); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error("That doesn't look like a zip file.");
+  let n = dv.getUint16(eocd + 10, true), off = dv.getUint32(eocd + 16, true); const out = [];
+  for (let k = 0; k < n; k++) {
+    if (dv.getUint32(off, true) !== 0x02014b50) break;
+    const method = dv.getUint16(off + 10, true), csize = dv.getUint32(off + 20, true);
+    const nlen = dv.getUint16(off + 28, true), elen = dv.getUint16(off + 30, true), clen = dv.getUint16(off + 32, true);
+    const lho = dv.getUint32(off + 42, true); const name = new TextDecoder().decode(buf.subarray(off + 46, off + 46 + nlen));
+    off += 46 + nlen + elen + clen;
+    if (!want(name)) continue;
+    const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true);
+    const data = buf.subarray(start, start + csize);
+    const raw = method === 0 ? data : method === 8 ? await pipe(data, new DecompressionStream("deflate-raw")) : null;
+    if (raw) out.push({name, text: new TextDecoder().decode(raw)});
+  }
+  return out;
+}
+const isHistory = n => /(StreamingHistory_music|StreamingHistory\d|Streaming_History_Audio|endsong)[^/]*\.json$/i.test(n);
+const isUser = n => /Userdata\.json$/i.test(n);
+async function readFiles(files){
+  const docs = [];
+  for (const f of files) {
+    if (/\.zip$/i.test(f.name) || f.type.includes("zip")) docs.push(...await unzip(f, n => isHistory(n) || isUser(n)));
+    else if (/\.json$/i.test(f.name)) docs.push({name: f.name, text: await f.text()});
+  }
+  const rows = []; let username = null;
+  for (const d of docs) {
+    let j; try { j = JSON.parse(d.text); } catch { continue; }
+    if (isUser(d.name) && j && !Array.isArray(j)) { username = j.username || j.displayName || null; continue; }
+    if (!Array.isArray(j)) continue;
+    for (const r of j) {
+      if (r.ts !== undefined) { // extended streaming history
+        const artist = r.master_metadata_album_artist_name, track = r.master_metadata_track_name;
+        if (!artist || !track) continue;
+        rows.push({t: Date.parse(r.ts), ms: r.ms_played || 0, a: artist, n: track, sk: r.skipped === true || r.reason_end === "fwdbtn", sh: !!r.shuffle, ext: 1});
+      } else if (r.endTime !== undefined && r.artistName !== undefined) { // account data (past year)
+        if (!r.trackName || r.artistName === "Unknown Artist") continue;
+        rows.push({t: Date.parse(r.endTime.replace(" ", "T") + "Z") - (r.msPlayed || 0), ms: r.msPlayed || 0, a: r.artistName, n: r.trackName});
+      }
+    }
+  }
+  if (!rows.length) throw new Error("No listening history found. Upload the zip Spotify emailed you, or the StreamingHistory / Streaming_History_Audio .json files inside it.");
+  // the basic and extended exports overlap; keep one copy of each play
+  const seen = new Set(); const uniq = [];
+  rows.sort((x, y) => x.t - y.t);
+  for (const r of rows) { const k = Math.round(r.t / 60000) + "|" + r.n + "|" + r.a; if (seen.has(k)) continue; seen.add(k); uniq.push(r); }
+  return {rows: uniq, username};
+}
+const dayKey = t => { const d = new Date(t); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+function topBy(rows, keyf, n){ const m = new Map(); for (const r of rows) { const k = keyf(r); const e = m.get(k) || m.set(k, {ms: 0, p: 0}).get(k); e.ms += r.ms; if (r.ms >= 30000) e.p++; } return [...m].sort((a, b) => b[1].ms - a[1].ms).slice(0, n); }
+function profileFromExport(rows, name){
+  const last = rows[rows.length - 1].t, first = rows[0].t;
+  const totalMs = rows.reduce((s, r) => s + r.ms, 0);
+  const plays = rows.filter(r => r.ms >= 30000).length;
+  const artistsAll = topBy(rows, r => r.a, 1e9), tracksAll = topBy(rows, r => r.n + "\u0000" + r.a, 1e9);
+  const term = days => { const sub = rows.filter(r => r.t >= last - days * 864e5);
+    return {a: topBy(sub, r => r.a, 50).map(x => x[0]), t: topBy(sub, r => r.n + "\u0000" + r.a, 50).map(x => x[0].split("\u0000"))}; };
+  const months = new Map(); const grid = Array.from({length: 7}, () => Array(24).fill(0)); const days = new Map();
+  const yearArt = new Map(), yearTrk = new Map(), yearMs = new Map(), firstHeard = new Map();
+  for (const r of rows) {
+    const d = new Date(r.t), mk = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+    months.set(mk, (months.get(mk) || 0) + r.ms);
+    grid[(d.getDay() + 6) % 7][d.getHours()] += r.ms;
+    const dk = dayKey(r.t); days.set(dk, (days.get(dk) || 0) + r.ms);
+    const y = d.getFullYear(); yearMs.set(y, (yearMs.get(y) || 0) + r.ms);
+    const ya = yearArt.get(y) || yearArt.set(y, new Map()).get(y); ya.set(r.a, (ya.get(r.a) || 0) + r.ms);
+    const yt = yearTrk.get(y) || yearTrk.set(y, new Map()).get(y); const tk = r.n + " · " + r.a; yt.set(tk, (yt.get(tk) || 0) + r.ms);
+    if (!firstHeard.has(r.a)) firstHeard.set(r.a, y);
+  }
+  const seq = []; const fd = new Date(first), ld = new Date(last);
+  for (let y = fd.getFullYear(), m = fd.getMonth(); y < ld.getFullYear() || (y === ld.getFullYear() && m <= ld.getMonth()); m++ ) { if (m > 11) { m = 0; y++; if (y > ld.getFullYear() || (y === ld.getFullYear() && m > ld.getMonth())) break; } const k = y + "-" + String(m + 1).padStart(2, "0"); seq.push([k, Math.round((months.get(k) || 0) / 60000)]); }
+  const newByYear = new Map(); for (const y of firstHeard.values()) newByYear.set(y, (newByYear.get(y) || 0) + 1);
+  const years = [...yearMs.keys()].sort().map(y => { const [ta, tam] = [...yearArt.get(y)].sort((a, b) => b[1] - a[1])[0]; const [tt] = [...yearTrk.get(y)].sort((a, b) => b[1] - a[1])[0];
+    return [y, ta, Math.round(tam / 60000), Math.round(yearMs.get(y) / 60000), tt, newByYear.get(y) || 0]; });
+  // longest streak of consecutive days
+  const dkeys = [...days.keys()].sort(); let best = 0, cur = 0, prev = null, bestEnd = null;
+  for (const k of dkeys) { const t = Date.parse(k + "T12:00:00Z"); cur = prev !== null && Math.round((t - prev) / 864e5) === 1 ? cur + 1 : 1; prev = t; if (cur > best) { best = cur; bestEnd = k; } }
+  const [bigDay, bigMs] = [...days].sort((a, b) => b[1] - a[1])[0];
+  const ext = rows.some(r => r.ext);
+  const night = rows.filter(r => { const h = new Date(r.t).getHours(); return h < 5; }).reduce((s, r) => s + r.ms, 0) / totalMs;
+  const tenShare = artistsAll.slice(0, 10).reduce((s, x) => s + x[1].ms, 0) / totalMs;
+  return {
+    v: 1, name: name || "Me", src: "export", gen: dayKey(Date.now()), span: [dayKey(first), dayKey(last)],
+    stats: { min: Math.round(totalMs / 60000), plays, tracks: tracksAll.length, artists: artistsAll.length, days: days.size,
+      streak: best, streakEnd: bestEnd, bigDay: [bigDay, Math.round(bigMs / 60000)],
+      skip: ext ? +(rows.filter(r => r.sk).length / rows.length).toFixed(3) : +(rows.filter(r => r.ms < 30000).length / rows.length).toFixed(3),
+      shuffle: ext ? +(rows.filter(r => r.sh).length / rows.length).toFixed(3) : null, night: +night.toFixed(3), ten: +tenShare.toFixed(3),
+      first: [dayKey(first), rows[0].n, rows[0].a], ext },
+    artists: artistsAll.slice(0, 50).map(([a, e]) => [a, Math.round(e.ms / 60000), e.p]),
+    tracks: tracksAll.slice(0, 50).map(([k, e]) => { const [n, a] = k.split("\u0000"); return [n, a, Math.round(e.ms / 60000), e.p]; }),
+    terms: { s: term(28), m: term(182), l: {a: artistsAll.slice(0, 50).map(x => x[0]), t: tracksAll.slice(0, 50).map(x => x[0].split("\u0000"))} },
+    months: seq, monthsLabel: "minutes", grid: grid.map(r => r.map(ms => Math.round(ms / 60000))), years,
+  };
+}
+
+// ---------- charts ----------
+function hueFor(s){ let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 360; }
+function disc(name){ return `<div class="disc" style="background:oklch(0.62 0.16 ${hueFor(name)})">${esc((name.match(/[\p{L}\p{N}]/u) || ["♪"])[0].toUpperCase())}</div>`; }
+function rankList(items, opts = {}){
+  // items: [{title, sub, value, label}]
+  const max = Math.max(...items.map(i => i.value || 0), 1); const hasBars = items.some(i => i.value != null); const limit = opts.limit ?? 10;
+  const li = (it, i) => `<li class="${i < 3 ? "top3" : ""}" ${it.tipText ? `data-tip="${esc(it.tipText)}"` : ""}><span class="n">${i + 1}</span><span class="t"><b>${esc(it.title)}</b>${it.sub ? `<span>${esc(it.sub)}</span>` : ""}${it.value != null ? `<div class="bar" style="width:${Math.max(3, 100 * it.value / max)}%"></div>` : ""}</span><span class="val">${esc(it.label ?? "")}</span></li>`;
+  const id = "r" + Math.random().toString(36).slice(2, 8);
+  return `<ol class="rank" id="${id}">${items.slice(0, limit).map(li).join("")}</ol>` + (items.length > limit ? `<button class="btn small more" data-more="${id}" data-limit="${limit}">Show all ${items.length}</button>` : "") +
+    `<template id="${id}-all">${items.map(li).join("")}</template>`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-more]"); if (!b) return; const ol = document.getElementById(b.dataset.more); const all = document.getElementById(b.dataset.more + "-all");
+  if (b.dataset.open) { ol.innerHTML = all.innerHTML.split("</li>").slice(0, +b.dataset.limit).join("</li>") + "</li>"; b.textContent = b.textContent.replace("Show fewer", "Show all"); delete b.dataset.open; b.textContent = "Show all " + (all.content.children.length); }
+  else { ol.innerHTML = all.innerHTML; b.dataset.open = 1; b.textContent = "Show fewer"; } });
+
+function lineChart(series, label){
+  // series: [[YYYY-MM, value]]
+  const W = innerWidth < 640 ? 480 : 900, H = innerWidth < 640 ? 240 : 230, P = {l: 40, r: 12, t: 22, b: 26};
+  const vals = series.map(s => s[1]); const max = Math.max(...vals, 1);
+  // one month far above the rest (a bulk import) would flatten everything else: clip it and say so
+  const second = [...vals].sort((a, b) => b - a)[1] || max; const clipped = max > 4 * second;
+  const nice = niceMax(clipped ? second * 1.15 : max);
+  const x = i => P.l + (series.length < 2 ? 0 : i * (W - P.l - P.r) / (series.length - 1)); const y = v => P.t + (H - P.t - P.b) * (1 - v / nice);
+  const pts = series.map((s, i) => [x(i), y(Math.min(s[1], nice))]);
+  const path = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("");
+  const area = path + `L${x(series.length - 1)} ${y(0)}L${x(0)} ${y(0)}Z`;
+  let grid = ""; for (let k = 0; k <= 4; k++) { const v = nice * k / 4; grid += `<line class="gridline" x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke-dasharray="${k ? "2 4" : ""}"/><text x="${P.l - 8}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`; }
+  let xt = ""; series.forEach((s, i) => { if (s[0].endsWith("-01")) xt += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${s[0].slice(0, 4)}</text><line class="gridline" x1="${x(i)}" x2="${x(i)}" y1="${y(0)}" y2="${y(0) + 4}"/>`; });
+  if (!xt) series.forEach((s, i) => { if (i % Math.ceil(series.length / 8) === 0) xt += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${MONTHS[+s[0].slice(5) - 1]} ${s[0].slice(2, 4)}</text>`; });
+  const peak = vals.indexOf(max);
+  const id = "lc" + Math.random().toString(36).slice(2, 8);
+  setTimeout(() => wireLine(id, series, pts, label, y(0), P.t), 0);
+  return `<div class="chart" id="${id}" data-hover><svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="height:auto;aspect-ratio:${W}/${H}">
+    <defs><linearGradient id="${id}g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+    ${grid}${xt}<path d="${area}" fill="url(#${id}g)"/><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${pts[peak][0]}" cy="${pts[peak][1]}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${pts[peak][0] < P.l + 90 ? pts[peak][0] + 8 : Math.min(pts[peak][0], W - 120)}" y="${Math.max(pts[peak][1] - 9, 12)}" text-anchor="${pts[peak][0] > W - 120 ? "end" : pts[peak][0] < P.l + 90 ? "start" : "middle"}" style="fill:var(--ink-2);font-weight:600">Peak: ${MONTHS[+series[peak][0].slice(5) - 1]} ${series[peak][0].slice(0, 4)}${clipped ? ` (${fmtFull(max)}, off the chart)` : ""}</text>
+    <line class="xh" x1="0" x2="0" y1="${P.t}" y2="${y(0)}" stroke="var(--ink-3)" stroke-width="1" style="display:none" vector-effect="non-scaling-stroke"/><circle class="xd" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" style="display:none"/>
+    <rect x="${P.l}" y="0" width="${W - P.l - P.r}" height="${H}" fill="transparent" class="hit"/></svg></div>` +
+    table(["Month", label], series.map(s => [s[0], fmtFull(s[1])]));
+}
+function wireLine(id, series, pts, label){
+  const el = document.getElementById(id); if (!el) return; const svg = el.querySelector("svg"), xh = el.querySelector(".xh"), xd = el.querySelector(".xd");
+  const move = e => { const r = svg.getBoundingClientRect(); const vx = (e.clientX - r.left) / r.width * svg.viewBox.baseVal.width; let bi = 0, bd = 1e9; pts.forEach((p, i) => { const d = Math.abs(p[0] - vx); if (d < bd) { bd = d; bi = i; } });
+    const [px, py] = pts[bi]; xh.setAttribute("x1", px); xh.setAttribute("x2", px); xh.style.display = ""; xd.setAttribute("cx", px); xd.setAttribute("cy", py); xd.style.display = "";
+    const s = series[bi]; showTip(`<b>${MONTHS[+s[0].slice(5) - 1]} ${s[0].slice(0, 4)}</b><br>${fmtFull(s[1])} ${esc(label)}`, e.clientX, e.clientY); };
+  svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
+  svg.addEventListener("pointerleave", () => { xh.style.display = "none"; xd.style.display = "none"; hideTip(); });
+}
+function niceMax(v){ const p = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p; return 10 * p; }
+function columns(data, opts){
+  // data: [[label, value]]
+  const W = 900, H = opts.h || 200, P = {l: 40, r: 8, t: 10, b: 24}; const max = niceMax(Math.max(...data.map(d => d[1]), 1));
+  const bw = (W - P.l - P.r) / data.length; const y = v => P.t + (H - P.t - P.b) * (1 - v / max);
+  let g = ""; for (let k = 0; k <= 4; k++) { const v = max * k / 4; g += `<line class="gridline" x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke-dasharray="${k ? "2 4" : ""}"/><text x="${P.l - 8}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`; }
+  const every = Math.ceil(data.length / (opts.ticks || 10));
+  data.forEach((d, i) => { const x = P.l + i * bw, h = y(0) - y(d[1]); const gap = Math.min(2, bw * .2);
+    g += `<g data-tip="${esc(opts.tip(d))}"><rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent"/>${d[1] ? `<path d="${roundTop(x + gap / 2, y(d[1]), bw - gap, h, Math.min(4, (bw - gap) / 2))}" fill="${opts.color ? opts.color(d) : "var(--accent)"}"/>` : ""}</g>`;
+    if (i % every === 0) g += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${esc(opts.xl ? opts.xl(d) : d[0])}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;aspect-ratio:${W}/${H}">${g}</svg>`;
+}
+function roundTop(x, y, w, h, r){ if (h <= 0) return ""; r = Math.min(r, h); return `M${x} ${y + h}V${y + r}Q${x} ${y} ${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h}Z`; }
+function table(head, rows){ return `<details class="tbl"><summary>Show as table</summary><table><tr>${head.map(h => `<th>${esc(h)}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</table></details>`; }
+function heatmap(grid){
+  const max = Math.max(...grid.flat(), 1);
+  let h = `<div class="heat"><span></span>${Array.from({length: 24}, (_, i) => `<span class="hh">${i % 6 === 0 ? (i === 0 ? "12a" : i === 12 ? "12p" : i < 12 ? i + "a" : (i - 12) + "p") : ""}</span>`).join("")}`;
+  grid.forEach((row, d) => { h += `<span class="hl">${DAYS[d]}</span>`; row.forEach((v, hr) => { const f = Math.sqrt(v / max);
+    h += `<span class="c" style="background:color-mix(in oklab,var(--accent) ${Math.round(6 + f * 94)}%,var(--surface-2))" data-tip="<b>${DAYS[d]} ${hourLabel(hr)}</b><br>${fmtFull(v)} minutes"></span>`; }); });
+  return h + "</div>" + table(["Day", ...Array.from({length: 24}, (_, i) => hourLabel(i))], grid.map((r, d) => [DAYS[d], ...r.map(fmtFull)]));
+}
+const hourLabel = h => (h % 12 || 12) + (h < 12 ? " AM" : " PM");
+function ring(pct, label){ const r = 60, c = 2 * Math.PI * r; return `<svg class="ring" viewBox="0 0 150 150"><circle cx="75" cy="75" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="14"/><circle cx="75" cy="75" r="${r}" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${c * pct} ${c}" transform="rotate(-90 75 75)"/><text x="75" y="80" text-anchor="middle" style="font-size:30px;font-weight:800;fill:var(--ink)">${Math.round(pct * 100)}%</text><text x="75" y="102" text-anchor="middle">${esc(label)}</text></svg>`; }
+
+// ---------- profile view ----------
+function archetypes(p){
+  const s = p.stats, out = [];
+  if (p.src === "export") {
+    if (s.night > 0.12) out.push("🦉 Night owl"); else { const morning = p.grid ? p.grid.reduce((t, r) => t + r.slice(5, 10).reduce((a, b) => a + b, 0), 0) / Math.max(1, p.grid.flat().reduce((a, b) => a + b, 0)) : 0; if (morning > 0.25) out.push("🌅 Early riser"); }
+    if (s.ten > 0.45) out.push("💍 Devoted fan"); else if (s.ten < 0.2) out.push("🧭 Explorer");
+    if (s.skip != null && s.skip < 0.12) out.push("🎧 Full-song listener"); else if (s.skip > 0.35) out.push("⏭️ Restless skipper");
+    if (s.streak >= 100) out.push(`🔥 ${s.streak}-day streak`);
+  } else {
+    if (s.pop != null) out.push(s.pop < 38 ? "💎 Crate digger" : s.pop > 60 ? "🏟️ Main stage" : "⚖️ Mainstream-adjacent");
+    if (s.genres > 150) out.push("🧭 Genre omnivore");
+    if (p.genres?.[0]) out.push("🎻 " + cap(p.genres[0][0]));
+    if (s.lib > 1500) out.push("📚 Collector");
+  }
+  return out;
+}
+const cap = s => s.replace(/\b\p{L}/gu, c => c.toUpperCase());
+function yearsSpan(p){ const a = new Date(p.span[0]), b = new Date(p.span[1]); return Math.max(1, Math.round((b - a) / (365.25 * 864e5) * 10) / 10); }
+
+function renderProfile(p, ctx = {}){
+  const s = p.stats, api = p.src === "api";
+  const sub = api ? `${fmtFull(s.lib)} saved songs since ${new Date(p.span[0]).getFullYear()}, read from Spotify on ${p.gen}.`
+                  : `${p.span[0]} to ${p.span[1]}: ${fmt(s.min / 60)} hours of music.`;
+  let h = "";
+  if (ctx.banner) h += ctx.banner;
+  h += `<section class="hero"><div class="kicker">${api ? "Soundprint" : "Soundprint · " + esc(p.span[0].slice(0, 4)) + "–" + esc(p.span[1].slice(0, 4))}</div><h1>${esc(p.name)}'s listening</h1><div class="sub">${esc(sub)}</div><div class="badges">${archetypes(p).map(b => `<span class="badge">${esc(b)}</span>`).join("")}</div></section>`;
+  const tiles = api ? [[fmtFull(s.lib), "songs saved"], [fmtFull(s.artists), "artists in the library"], [fmtFull(s.hours), "hours of saved music"], [fmtFull(s.genres), "genres touched"], [s.pls, "playlists made"], [yearsSpan(p) + " yrs", "of saving music"]]
+    : [[fmt(s.min), "minutes listened"], [fmt(s.min / 60 / 24) + " days", "of nonstop music"], [fmtFull(s.plays), "plays"], [fmtFull(s.artists), "artists"], [fmtFull(s.tracks), "different songs"], [s.streak + " days", "longest daily streak"]];
+  h += `<div class="tiles">${tiles.map(t => `<div class="tile"><div class="v">${esc(t[0])}</div><div class="l">${esc(t[1])}</div></div>`).join("")}</div>`;
+
+  // top artists with term switch
+  const terms = p.terms; const termNames = api ? {s: "4 weeks", m: "6 months", l: "All time"} : {s: "Last 4 weeks", m: "Last 6 months", l: "All time"};
+  h += `<section class="card" id="artistsCard"><h2>Top artists</h2><p class="note">${api ? "Spotify's own ranking of what you play most." : "Ranked by minutes played."}</p>
+    ${terms ? `<div class="seg" role="group" data-seg="artists">${Object.keys(termNames).map(k => `<button aria-pressed="${k === "l"}" data-term="${k}">${termNames[k]}</button>`).join("")}</div>` : ""}<div class="body"></div></section>`;
+  h += `<section class="card" id="tracksCard"><h2>Top songs</h2><p class="note">${api ? "Spotify's ranking, by time range." : "Ranked by minutes played."}</p>
+    ${terms ? `<div class="seg" role="group" data-seg="tracks">${Object.keys(termNames).map(k => `<button aria-pressed="${k === "l"}" data-term="${k}">${termNames[k]}</button>`).join("")}</div>` : ""}<div class="body"></div></section>`;
+
+  if (p.months?.length > 1) h += `<section class="card"><h2>${api ? "Your library, month by month" : "Listening over time"}</h2><p class="note">${api ? "Songs you saved each month. Hover or tap for the count." : "Minutes per month. Hover or tap for details."}</p>${lineChart(p.months, p.monthsLabel)}</section>`;
+
+  if (p.years?.length) {
+    h += `<section class="card"><h2>Your eras</h2><p class="note">${api ? "The artist you saved the most of, year by year." : "Your top artist each year."}</p><div class="eras">${p.years.map(y => api
+      ? `<div class="era" style="background:linear-gradient(160deg,oklch(0.6 0.17 ${hueFor(y[1])}),oklch(0.45 0.15 ${(hueFor(y[1]) + 40) % 360}))"><div class="y">${y[0]}</div><div class="a">${esc(y[1])}</div><div class="s">${y[2]} songs saved of ${fmtFull(y[3])} that year</div></div>`
+      : `<div class="era" style="background:linear-gradient(160deg,oklch(0.6 0.17 ${hueFor(y[1])}),oklch(0.45 0.15 ${(hueFor(y[1]) + 40) % 360}))"><div class="y">${y[0]}</div><div class="a">${esc(y[1])}</div><div class="s">${fmtFull(y[2])} min of ${fmtFull(y[3])} · ${fmtFull(y[5])} new artists</div><div class="s" style="opacity:.8">♪ ${esc(y[4])}</div></div>`).join("")}</div></section>`;
+  }
+
+  if (p.grid) {
+    const flat = p.grid.flat(); const bi = flat.indexOf(Math.max(...flat));
+    h += `<div class="grid2"><section class="card"><h2>When you listen</h2><p class="note">Busiest slot: <b>${DAYS[Math.floor(bi / 24)]} around ${hourLabel(bi % 24)}</b>. Times are in this device's time zone.</p>${heatmap(p.grid)}</section>
+      <section class="card"><h2>Habits</h2><p class="note">How you listen, not just what.</p><div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:space-around">${ring(1 - s.skip, "played through")}${s.shuffle != null ? ring(s.shuffle, "on shuffle") : ring(s.ten, "top-10 artists")}</div>
+      <ul class="steps" style="margin-top:12px"><li>Biggest day: <b>${esc(s.bigDay[0])}</b>, ${fmtFull(s.bigDay[1])} minutes.</li><li>Longest streak: <b>${s.streak} days</b> in a row, ending ${esc(s.streakEnd)}.</li><li>First song on record: <b>${esc(s.first[1])}</b> by ${esc(s.first[2])} (${esc(s.first[0])}).</li><li>Your top 10 artists are <b>${Math.round(s.ten * 100)}%</b> of your listening.</li></ul></section></div><div style="height:18px"></div>`;
+  }
+
+  if (p.genres?.length) {
+    const g = p.genres.slice(0, 15);
+    h += `<div class="grid2"><section class="card"><h2>Genres</h2><p class="note">Share of your library by each artist's genres (an artist with three genres counts a third to each).</p>${rankList(g.map(x => ({title: cap(x[0]), value: x[1], label: (x[1] / s.lib * 100).toFixed(1) + "%"})), {limit: 15})}</section>
+      <section class="card"><h2>Genre cloud</h2><p class="note">Your top 30 genres, sized by weight.</p><div class="chips" style="gap:8px;align-items:baseline">${shuffleSeeded(p.genres.slice(0, 30)).map(x => { const f = x[1] / p.genres[0][1]; return `<span class="chip ${f > .5 ? "hot" : ""}" style="font-size:${(12 + f * 14).toFixed(1)}px" data-tip="<b>${esc(cap(x[0]))}</b><br>${x[1]} songs' worth">${esc(x[0])}</span>`; }).join("")}</div></section></div><div style="height:18px"></div>`;
+  }
+  if (p.eras?.length) {
+    const era = p.eras.filter(e => e[0] >= 1950); const dec = {}; for (const [y, n] of era) dec[Math.floor(y / 10) * 10] = (dec[Math.floor(y / 10) * 10] || 0) + n;
+    const topDec = Object.entries(dec).sort((a, b) => b[1] - a[1])[0];
+    const med = (() => { const all = []; era.forEach(([y, n]) => { for (let i = 0; i < n; i++) all.push(y); }); return all[Math.floor(all.length / 2)]; })();
+    h += `<section class="card"><h2>Release years</h2><p class="note">When the songs you save came out. Half are from <b>${med}</b> or later; your decade is the <b>${topDec[0]}s</b>.</p>${columns(era, {tip: d => `<b>${d[0]}</b><br>${d[1]} songs`, xl: d => d[0] % 10 === 0 ? d[0] : "", ticks: 80})}${table(["Year", "Songs"], era)}</section>`;
+  }
+  if (p.popHist && s.pop != null) {
+    h += `<section class="card"><h2>Mainstream meter</h2><p class="note">Spotify rates every song 0 to 100 for how much it's played right now. Your saved songs average <b>${s.pop}</b>.</p><div class="meter"><div class="pin" style="left:${s.pop}%">You: ${s.pop}</div></div><div class="meterlabels"><span>Hidden gems</span><span>Chart toppers</span></div>
+      <div style="margin-top:16px">${columns(p.popHist.map((n, i) => [i * 10 + "–" + (i * 10 + 9), n]), {h: 140, tip: d => `<b>Popularity ${d[0]}</b><br>${d[1]} songs`})}</div></section>`;
+  }
+  if (api && s.rising?.length) h += `<section class="card"><h2>On the rise</h2><p class="note">In your top artists this month but not your all-time list.</p><div class="chips">${s.rising.map(a => `<span class="chip hot">${esc(a)}</span>`).join("")}</div></section>`;
+  return h;
+}
+function shuffleSeeded(a){ const b = a.slice(); let s = 7; for (let i = b.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor(s / 233280 * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+
+function fillTerms(p, root){
+  const api = p.src === "api";
+  const aInfo = new Map(p.artists.map(a => [a[0], a]));
+  const tInfo = new Map(p.tracks.map(t => [t[0] + "\u0000" + t[1], t]));
+  const drawA = term => {
+    const names = p.terms ? p.terms[term].a : p.artists.map(a => a[0]);
+    const items = names.map((n, i) => { const info = aInfo.get(n); return api
+      ? {title: n, sub: (info?.[2] || []).join(", "), value: null, label: ""}
+      : {title: n, sub: info && term === "l" ? fmtFull(info[2]) + " plays" : "", value: term === "l" && info ? info[1] : names.length - i, label: term === "l" && info ? fmtFull(info[1]) + " min" : ""}; });
+    const pod = names.slice(0, 3).map((n, i) => `<div class="pod">${disc(n)}<b>${esc(n)}</b><span>#${i + 1}${!api && term === "l" && aInfo.get(n) ? " · " + fmt(aInfo.get(n)[1]) + " min" : ""}</span></div>`).join("");
+    $("#artistsCard .body", root).innerHTML = `<div class="podium">${pod}</div>` + rankList(items.slice(3).map(x => x), {limit: 12}).replace(/<span class="n">(\d+)<\/span>/g, (m, d) => `<span class="n">${+d + 3}</span>`);
+  };
+  const drawT = term => {
+    const list = p.terms ? p.terms[term].t : p.tracks.map(t => [t[0], t[1]]);
+    const items = list.map((t, i) => { const info = tInfo.get(t[0] + "\u0000" + t[1]);
+      return {title: t[0], sub: t[1], value: api ? null : term === "l" && info ? info[2] : list.length - i, label: !api && term === "l" && info ? fmtFull(info[3]) + " plays" : ""}; });
+    $("#tracksCard .body", root).innerHTML = rankList(items, {limit: 15});
+  };
+  drawA("l"); drawT("l");
+  root.querySelectorAll("[data-seg]").forEach(seg => seg.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return;
+    seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); (seg.dataset.seg === "artists" ? drawA : drawT)(b.dataset.term); }));
+}
+
+// ---------- compare ----------
+function weights(p){
+  const m = new Map(); const add = (n, w) => m.set(n.toLowerCase(), (m.get(n.toLowerCase()) || 0) + w);
+  if (p.terms) for (const k of ["s", "m", "l"]) p.terms[k].a.forEach((n, i) => add(n, (50 - i) / 50));
+  p.artists.forEach((a, i) => add(a[0], (50 - i) / 50));
+  return m;
+}
+function compare(me, them){
+  const a = weights(me), b = weights(them); let dot = 0, na = 0, nb = 0;
+  for (const [k, v] of a) { na += v * v; if (b.has(k)) dot += v * b.get(k); } for (const v of b.values()) nb += v * v;
+  const sim = dot / Math.sqrt(na * nb || 1);
+  const shared = [...a.keys()].filter(k => b.has(k)).sort((x, y) => a.get(y) * b.get(y) - a.get(x) * b.get(x));
+  const disp = new Map(); [...me.artists, ...them.artists].forEach(x => disp.set(x[0].toLowerCase(), x[0])); for (const p of [me, them]) if (p.terms) for (const k in p.terms) p.terms[k].a.forEach(n => disp.set(n.toLowerCase(), n));
+  const theirsOnly = [...b.keys()].filter(k => !a.has(k)).sort((x, y) => b.get(y) - b.get(x)).slice(0, 12);
+  const mineOnly = [...a.keys()].filter(k => !b.has(k)).sort((x, y) => a.get(y) - a.get(x)).slice(0, 12);
+  const tracksOf = p => new Set([...(p.tracks || []).map(t => (t[0] + "|" + t[1]).toLowerCase()), ...(p.terms ? Object.values(p.terms).flatMap(t => t.t.map(x => (x[0] + "|" + x[1]).toLowerCase())) : [])]);
+  const ta = tracksOf(me), tb = tracksOf(them); const sharedTracks = [...ta].filter(k => tb.has(k));
+  const pct = Math.min(1, Math.sqrt(sim)); // cosine on sparse top lists runs low; sqrt reads closer to intuition
+  const verdict = pct > .7 ? "Basically the same person" : pct > .5 ? "Kindred ears" : pct > .3 ? "Plenty to talk about" : pct > .15 ? "Some common ground" : "Opposites attract";
+  const gA = new Set((me.genres || []).slice(0, 20).map(g => g[0])), gB = (them.genres || []).slice(0, 20).map(g => g[0]).filter(g => gA.has(g));
+  return `<section class="hero"><div class="kicker">Soundprint · Compare</div><h1>${esc(me.name)} &amp; ${esc(them.name)}</h1><div class="sub">${esc(verdict)}.</div></section>
+    <section class="card"><div class="vs"><div class="who">${esc(me.name)}</div>${ring(pct, "taste match")}<div class="who">${esc(them.name)}</div></div>
+    <p class="note" style="text-align:center;margin-top:8px">${shared.length} artists and ${sharedTracks.length} songs in common across your top lists.</p></section>
+    <section class="card"><h2>You both love</h2>${shared.length ? rankList(shared.map(k => ({title: disp.get(k) || k, value: a.get(k) * b.get(k), label: ""})), {limit: 10}) : `<p class="muted">No overlap in your top artists. That's a lot to trade.</p>`}</section>
+    ${sharedTracks.length ? `<section class="card"><h2>Songs you share</h2><div class="chips">${sharedTracks.slice(0, 20).map(k => { const [n, ar] = k.split("|"); return `<span class="chip hot">${esc(cap(n))} <span class="muted">· ${esc(cap(ar))}</span></span>`; }).join("")}</div></section>` : ""}
+    <div class="grid2"><section class="card"><h2>From ${esc(them.name)}'s world</h2><p class="note">Their favourites you don't have. Try these.</p><div class="chips">${theirsOnly.map(k => `<span class="chip">${esc(disp.get(k) || k)}</span>`).join("")}</div></section>
+    <section class="card"><h2>From yours</h2><p class="note">Your favourites they're missing.</p><div class="chips">${mineOnly.map(k => `<span class="chip">${esc(disp.get(k) || k)}</span>`).join("")}</div></section></div>
+    ${gB.length ? `<div style="height:18px"></div><section class="card"><h2>Shared genres</h2><div class="chips">${gB.map(g => `<span class="chip hot">${esc(g)}</span>`).join("")}</div></section>` : ""}`;
+}
+
+// ---------- landing ----------
+function landing(err){
+  const mine = loadMine();
+  return `<section class="hero"><div class="kicker">Soundprint</div><h1>Your listening,<br>all of it.</h1><div class="sub">Like Wrapped, but for your whole history, any day of the year. Load your Spotify data, see your stats, then share a link so friends can compare.</div></section>
+  ${mine ? `<div class="banner"><span class="grow">Your Soundprint is saved on this device (${esc(mine.name)}, ${esc(mine.span[0])} to ${esc(mine.span[1])}).</span><button class="btn primary" data-go="mine">Open mine</button><button class="btn" data-go="forget">Remove it</button></div>` : ""}
+  <div class="grid2"><section class="card"><h2>1. Get your data from Spotify</h2><p class="note">Spotify emails it to you; this part takes a few days.</p>
+    <ol class="steps"><li>Open <a href="https://www.spotify.com/account/privacy/" target="_blank" rel="noopener">spotify.com/account/privacy</a> and sign in.</li>
+    <li>Tick <b>Extended streaming history</b> (your whole history, up to 30 days to arrive) or <b>Account data</b> (the past year, about 5 days). Both work.</li>
+    <li>Confirm the email, then wait for the "your data is ready" email and download the zip.</li></ol></section>
+  <section class="card"><h2>2. Load it here</h2><p class="note">Everything is worked out on this device. Nothing is uploaded.</p>
+    <label class="muted" style="font-size:13px">Your name, as friends will see it<br><input type="text" id="nameIn" placeholder="e.g. Sam" value="${esc(mine?.name || "")}"></label>
+    <div class="drop" id="drop" style="margin-top:12px"><h3>Drop the zip here</h3><p class="muted" style="margin:0 0 12px">or the .json files inside it</p><button class="btn primary" id="pick">Choose files</button><input type="file" id="file" accept=".zip,.json,application/zip,application/json" multiple hidden>
+    <div class="progress" id="prog"><i></i></div>${err ? `<div class="err">${esc(err)}</div>` : ""}</div></section></div>`;
+}
+function loadMine(){ try { return JSON.parse(localStorage.getItem(MINE_KEY)); } catch { return null; } }
+
+// ---------- routing ----------
+let current = null;
+async function route(){
+  const app = $("#app"); const actions = $("#topActions"); actions.innerHTML = ""; hideTip(); scrollTo(0, 0);
+  const hash = new URLSearchParams(location.hash.slice(1));
+  if (hash.get("s")) {
+    let them; try { them = await decodeProfile(hash.get("s")); } catch { app.innerHTML = landing("That share link is damaged or incomplete. Ask for it again?"); wireLanding(); return; }
+    const mine = loadMine(); current = them;
+    if (hash.get("c") === "1" && mine) { app.innerHTML = compare(mine, them); actions.innerHTML = `<button class="btn small" data-go="back">Back to ${esc(them.name)}</button>`; return; }
+    const isMine = mine && mine.name === them.name && mine.gen === them.gen;
+    const banner = isMine ? "" : `<div class="banner"><span class="grow">${esc(them.name)} shared their Soundprint with you.</span>${mine ? `<button class="btn primary" data-go="compare">Compare with mine</button>` : `<button class="btn primary" data-go="home">Make your own</button>`}</div>`;
+    app.innerHTML = renderProfile(them, {banner}); fillTerms(them, app);
+    actions.innerHTML = `<button class="btn small" data-go="share">Share</button>`;
+    return;
+  }
+  if (hash.get("view") === "mine" && loadMine()) { const mine = current = loadMine(); app.innerHTML = renderProfile(mine); fillTerms(mine, app); actions.innerHTML = `<button class="btn small primary" data-go="share">Share my Soundprint</button>`; return; }
+  current = null; app.innerHTML = landing(); wireLanding();
+}
+function wireLanding(){
+  const drop = $("#drop"), file = $("#file"); if (!drop) return;
+  $("#pick").onclick = () => file.click(); file.onchange = () => file.files.length && load([...file.files]);
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => e.dataTransfer.files.length && load([...e.dataTransfer.files]));
+}
+async function load(files){
+  const prog = $("#prog"); prog.style.display = "block"; prog.firstElementChild.style.width = "30%";
+  try {
+    const {rows, username} = await readFiles(files); prog.firstElementChild.style.width = "80%";
+    const name = $("#nameIn").value.trim() || username || "Me";
+    const p = profileFromExport(rows, name);
+    localStorage.setItem(MINE_KEY, JSON.stringify(p));
+    const pending = sessionStorage.getItem("soundprint.compareTo");
+    if (pending) { sessionStorage.removeItem("soundprint.compareTo"); location.hash = "s=" + pending + "&c=1"; }
+    else location.hash = "view=mine";
+  } catch (e) { $("#app").innerHTML = landing(e.message || String(e)); wireLanding(); }
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-go]"); if (!b) return; const go = b.dataset.go; const hash = new URLSearchParams(location.hash.slice(1));
+  if (go === "mine") location.hash = "view=mine";
+  else if (go === "forget") { localStorage.removeItem(MINE_KEY); route(); }
+  else if (go === "home") { if (hash.get("s")) sessionStorage.setItem("soundprint.compareTo", hash.get("s")); location.hash = ""; route(); }
+  else if (go === "compare") location.hash = "s=" + hash.get("s") + "&c=1";
+  else if (go === "back") location.hash = "s=" + hash.get("s");
+  else if (go === "share" && current) {
+    const url = hash.get("s") && !hash.get("c") ? location.href : await shareLink(current);
+    if (navigator.share) { try { await navigator.share({title: current.name + "'s Soundprint", url}); return; } catch (err) { if (err.name === "AbortError") return; } }
+    try { await navigator.clipboard.writeText(url); toast("Link copied. Send it to a friend."); } catch { prompt("Copy this link:", url); }
+  }
+});
+$("#home").addEventListener("click", e => { e.preventDefault(); history.pushState(null, "", location.pathname); route(); });
+addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>
