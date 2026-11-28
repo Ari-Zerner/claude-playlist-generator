@@ -112,6 +112,7 @@ All take the form `python3 spotify-tool/app.py <command>`. `<name>` is a directo
 | `push [name]` | Replaces the Spotify playlist with `Playlist.txt`. |
 | `pull [name]` | Pulls the Spotify playlist back into `Playlist.txt`. |
 | `export <URL>` | Prints the tracks of any playlist you own or collaborate on. |
+| `mix <name>` | Rebuilds a playlist from the taste playlist: recent, much-played adds plus some old favourites, shuffled. Tracks you remove on Spotify stay out. `--dry` previews. Run it weekly (`scripts/weekly-mix.sh`) for a self-refreshing mix. |
 | `taste [--if-stale]` | Rebuilds `taste/` from play statistics and, if set, `TASTE_PLAYLIST` and past playlists. |
 | `similar "Artist"` | Last.fm: similar artists and the artist's tags. |
 | `similar "Artist - Title"` | Last.fm: similar tracks. |

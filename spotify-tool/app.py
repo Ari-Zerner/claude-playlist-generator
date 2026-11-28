@@ -20,6 +20,9 @@ Usage (run from anywhere; PLAYLIST is a directory name under playlists/):
   python3 app.py artist "Artist"    # Spotify: the artist's top tracks and whole catalog
                                     # (--top for top tracks only, --groups to change
                                     # which releases: album,single,compilation,appears_on)
+  python3 app.py mix [PLAYLIST]     # Rebuild a mix from the taste playlist: recent,
+                                    # much-played adds plus old favourites, shuffled
+                                    # (--size 80, --old-share 0.3, --dry)
   python3 app.py auth               # One-time OAuth login, saves token
   python3 app.py auth --print-url   # Headless: just print the login URL...
   python3 app.py auth REDIRECT_URL  # ...then paste the URL the browser was sent to
@@ -438,6 +441,7 @@ def fetch_playlist_items(pid):
                     "line": f"{', '.join(artists)} - {t['name']}",
                     "artists": artists,
                     "added_at": entry.get("added_at"),
+                    "uri": t.get("uri"),
                 })
         endpoint = data.get("next")
     return items
@@ -825,6 +829,8 @@ def build_hits(index, today):
     total_hits = 0
     for slug in playlist_names():
         pdir = os.path.join(PLAYLISTS_DIR, slug)
+        if read_meta(pdir).get("mix"):
+            continue  # Drawn from the taste playlist itself: every track is "already known".
         created = read_meta(pdir).get("created") or ""
         # Tracks cut since the last batch still count: they were suggested too.
         lines = list(dict.fromkeys(
@@ -1137,6 +1143,191 @@ def do_artist(name, groups="album,single", top_only=False):
 
 # --------------- Main ---------------
 
+# --------------- Mix: a playlist drawn from the taste playlist itself ---------------
+
+MIX_STATE_FILE = "mix-state.json"
+MIX_RECENT_DAYS = 120      # "Recently added" for the core of the mix
+MIX_RECENT_HALF_LIFE = 60  # How fast a recent add fades out of the core
+MIX_OLD_DAYS = 180         # Old favourites are at least this old
+MIX_REPEAT_WEEKS = 3       # Old favourites picked this recently are mostly skipped
+
+
+def _mix_key(artists, title):
+    return (_norm(artists[0]) if artists else "", _title_core(title))
+
+
+def _top_tracks(time_range, pages=2):
+    """Spotify's most-played tracks for a range, most played first (up to 50 per page)."""
+    out = []
+    for page in range(pages):
+        out += _get_items(f"/me/top/tracks?time_range={time_range}&limit=50&offset={page * 50}")
+    return out
+
+
+def _play_scores():
+    """{key: {"short": s, "medium": s, "long": s, "recent": n}} from Spotify's statistics."""
+    scores = collections.defaultdict(lambda: collections.Counter())
+    for rng in ("short_term", "medium_term", "long_term"):
+        tracks = _top_tracks(rng)
+        for rank, t in enumerate(tracks):
+            key = _mix_key([a["name"] for a in t["artists"]], t["name"])
+            scores[key][rng.split("_")[0]] = max(scores[key][rng.split("_")[0]],
+                                                1 - rank / max(len(tracks), 1))
+    for p in _get_items("/me/player/recently-played?limit=50"):
+        t = p.get("track")
+        if t:
+            scores[_mix_key([a["name"] for a in t["artists"]], t["name"])]["recent"] += 1
+    return scores
+
+
+def _weighted_sample(pool, weight, k, rng):
+    """k items without replacement, each drawn with probability proportional to weight."""
+    keyed = [(rng.random() ** (1 / w), i) for i, w in ((i, weight(i)) for i in pool) if w > 0]
+    return [i for _, i in sorted(keyed, key=lambda x: x[0], reverse=True)[:k]]
+
+
+def _spread_artists(tracks, rng):
+    """Shuffle, then move tracks so the same artist doesn't play twice in a row."""
+    tracks = tracks[:]
+    rng.shuffle(tracks)
+    for _ in range(3):
+        for i in range(1, len(tracks)):
+            if set(tracks[i]["artists"]) & set(tracks[i - 1]["artists"]):
+                for j in range(len(tracks)):
+                    if j in (i, i - 1):
+                        continue
+                    neighbours = [tracks[n] for n in (j - 1, j + 1, i - 1, i + 1)
+                                  if 0 <= n < len(tracks) and n not in (i, j)]
+                    if not any(set(tracks[j]["artists"]) & set(n["artists"]) or
+                               set(tracks[i]["artists"]) & set(n["artists"])
+                               for n in neighbours):
+                        tracks[i], tracks[j] = tracks[j], tracks[i]
+                        break
+    return tracks
+
+
+def do_mix(name, size=80, old_share=0.3, dry=False, seed=None):
+    """Rebuild a mix playlist: recent, much-played adds plus a few old favourites, shuffled."""
+    import random
+    source = os.environ.get("TASTE_PLAYLIST")
+    if not source:
+        raise ToolError("mix draws from the taste playlist; set TASTE_PLAYLIST first.")
+    pdir = resolve_playlist(name)
+    meta = read_meta(pdir)
+    state_path = os.path.join(pdir, MIX_STATE_FILE)
+    state = {"pushed": [], "removed": [], "history": []}
+    if os.path.exists(state_path):
+        with open(state_path) as f:
+            state.update(json.load(f))
+    today = datetime.date.today()
+    rng = random.Random(seed if seed is not None else today.isoformat())
+
+    # Tracks taken out of the mix on Spotify since the last push stay out.
+    if meta.get("spotify_id") and state["pushed"]:
+        current = {it["uri"] for it in fetch_playlist_items(meta["spotify_id"])}
+        if current:
+            known = {r["uri"] for r in state["removed"]}
+            for p in state["pushed"]:
+                if p["uri"] not in current and p["uri"] not in known:
+                    state["removed"].append({**p, "date": today.isoformat()})
+                    print(f"Removed on Spotify, left out from now on: {p['line']}")
+    removed_uris = {r["uri"] for r in state["removed"]}
+    removed_keys = {_mix_key(*_split_raw(r["line"])) for r in state["removed"]}
+
+    items, seen = [], set()
+    for it in fetch_playlist_items(extract_playlist_id(source)):
+        uri = it.get("uri") or ""
+        title = it["line"][len(", ".join(it["artists"])) + 3:]
+        key = _mix_key(it["artists"], title)
+        if (not uri.startswith("spotify:track:") or uri in seen or key in seen
+                or uri in removed_uris or key in removed_keys):
+            continue
+        seen |= {uri, key}
+        try:
+            added = datetime.date.fromisoformat((it["added_at"] or "")[:10])
+            age = (today - added).days if added.year >= 2006 else None
+        except ValueError:
+            age = None
+        items.append({**it, "key": key, "age": age})
+
+    plays = _play_scores()
+    for it in items:
+        p = plays.get(it["key"], {})
+        it["short"], it["medium"], it["long"] = p.get("short", 0), p.get("medium", 0), p.get("long", 0)
+        it["recent"] = p.get("recent", 0)
+
+    # Core: added in the last few months, or on repeat right now.
+    n_old = round(size * old_share)
+    core_pool = [it for it in items
+                 if (it["age"] is not None and it["age"] <= MIX_RECENT_DAYS) or it["short"]]
+
+    def core_weight(it):
+        fresh = 0.5 ** (it["age"] / MIX_RECENT_HALF_LIFE) if it["age"] is not None else 0
+        return 0.3 + fresh + 2 * it["short"] + it["medium"] + 0.3 * min(it["recent"], 3)
+    core = _weighted_sample(core_pool, lambda it: core_weight(it) ** 2, size - n_old, rng)
+
+    # Old favourites: long-loved tracks, plus older ones by artists still in favour.
+    picked = {it["uri"] for it in core}
+    recent_old = {u for h in state["history"][-MIX_REPEAT_WEEKS:] for u in h.get("old", [])}
+    artist_score = collections.Counter()
+    for it in items:
+        if it["age"] is not None:
+            for a in it["artists"]:
+                artist_score[a] += 0.5 ** (it["age"] / 365)
+    top_artist = max(artist_score.values(), default=1)
+    old_pool = [it for it in items if it["uri"] not in picked
+                and it["age"] is not None and it["age"] >= MIX_OLD_DAYS]
+
+    def old_weight(it):
+        w = (0.5 + 3 * it["long"] + 2 * it["medium"]
+             + 2 * max((artist_score[a] for a in it["artists"]), default=0) / top_artist)
+        return w * (0.1 if it["uri"] in recent_old else 1)
+    old = _weighted_sample(old_pool, old_weight, n_old, rng)
+
+    mix = _spread_artists(core + old, rng)
+    lines = [it["line"] for it in mix]
+    old_uris = {it["uri"] for it in old}
+    print(f"Mix of {len(mix)}: {len(core)} recent or on repeat, {len(old)} old favourites.")
+    for it in mix:
+        tag = "old " if it["uri"] in old_uris else "new "
+        age = f"{it['age']:>4}d" if it["age"] is not None else "   ?d"
+        print(f"  {tag}{age}  {it['line']}")
+    if dry:
+        print("\n--dry: nothing written or pushed.")
+        return
+
+    with open(playlist_file(pdir), "w") as f:
+        f.write(f"# Rebuilt {today} by `app.py mix`; edits here are overwritten next time.\n"
+                "# Remove tracks on Spotify instead: they stay out of later mixes.\n")
+        f.write("\n".join(lines) + "\n")
+    playlist_id = ensure_on_spotify(pdir)
+    uris = [it["uri"] for it in mix]
+    for i in range(0, len(uris), 100):
+        resp = api("PUT" if i == 0 else "POST", f"/playlists/{playlist_id}/items",
+                   json={"uris": uris[i:i + 100]})
+        if resp.status_code not in (200, 201):
+            raise ToolError(f"Error adding tracks {i + 1}-{i + 100}: "
+                            f"{resp.status_code} {resp.text}")
+    description = brief_description(pdir)
+    if description and not description_problem(pdir):
+        api("PUT", f"/playlists/{playlist_id}", json={"description": description})
+
+    state["pushed"] = [{"uri": it["uri"], "line": it["line"]} for it in mix]
+    state["history"] = (state["history"] + [{"date": today.isoformat(),
+                                             "old": sorted(old_uris)}])[-12:]
+    _atomic_write(state_path, json.dumps(state, indent=1) + "\n")
+    if not meta.get("mix"):
+        meta["mix"] = True
+        write_meta(pdir, meta)
+    print(f"\nPushed {len(uris)} tracks to {read_meta(pdir)['spotify_url']}")
+
+
+def _split_raw(line):
+    artist, title = line.split(" - ", 1)
+    return artist.split(", "), title
+
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -1164,6 +1355,12 @@ def main():
         p = sub.add_parser(cmd)
         p.add_argument(arg)
         p.add_argument("--limit", type=int, default=25)
+    p = sub.add_parser("mix")
+    p.add_argument("playlist", nargs="?")
+    p.add_argument("--size", type=int, default=80)
+    p.add_argument("--old-share", type=float, default=0.3)
+    p.add_argument("--dry", action="store_true")
+    p.add_argument("--seed")
     p = sub.add_parser("artist")
     p.add_argument("name")
     p.add_argument("--top", action="store_true")
@@ -1191,6 +1388,8 @@ def main():
             do_similar(args.query, args.limit)
         elif args.cmd == "tag":
             do_tag(args.tag, args.limit)
+        elif args.cmd == "mix":
+            do_mix(args.playlist, args.size, args.old_share, args.dry, args.seed)
         elif args.cmd == "artist":
             do_artist(args.name, args.groups, args.top)
     except (ToolError, requests.RequestException) as e:

@@ -89,6 +89,19 @@ Treat the output as leads to judge against the brief, not as a list to paste in.
 released recently, search the web. `similar` and `tag` need `LASTFM_API_KEY` in
 `spotify-tool/.env`; if it is missing, say so and carry on without. `artist` needs only Spotify.
 
+## Mix playlists (rebuilt from the taste playlist)
+
+`python3 spotify-tool/app.py mix <name>` rebuilds a playlist from the taste playlist itself,
+instead of from a curated `Playlist.txt`: mostly tracks added in the last four months or on
+repeat in the last four weeks, weighted by how fresh and how played they are, plus ~30% old
+favourites (Spotify's long-term top tracks, older tracks by artists still in favour), rotated
+week to week, shuffled so no artist plays twice in a row. `--dry` previews; `--size`,
+`--old-share`. It sets `"mix": true` in `playlist.json` (Hits.md skips those) and keeps
+`mix-state.json`: what it last pushed, and **tracks removed on Spotify, which stay out of
+later mixes**. `Playlist.txt` is overwritten each run, so don't hand-edit a mix.
+`scripts/weekly-mix.sh` rebuilds every mix playlist; a box timer runs it weekly (log
+`/var/log/playlist-mix.log`). First one: `everyday-mix` (Ari, 2026-11-27).
+
 ## Editing a playlist
 
 - Edit `playlists/<name>/Playlist.txt` directly. Add songs in batches, keeping to the brief.
@@ -105,6 +118,9 @@ released recently, search the web. `similar` and `tag` need `LASTFM_API_KEY` in
   - `python3 spotify-tool/app.py export <URL>` — prints the tracks of any playlist the user owns.
 
 ## Curation rules
+- **Each playlist stands on its own.** Pick songs for this playlist's brief only; never leave a
+  song out because it is in another playlist (Ari, 2026-11-25: "Playlists are independent of
+  each other"). The removals rule below is per playlist.
 - **Never re-add a song the user has removed.** Removals are deliberate taste decisions.
   Before adding any song, check it against both the current `Playlist.txt` AND
   `Playlist_before_edits.txt`, and `git log -p` on the playlist file where it is tracked. If a
